@@ -1,447 +1,457 @@
 <!DOCTYPE html>
-<html lang="en" class="dark">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI Voice Forensics | Deepfake & Synthetic Voice Detection</title>
-    <!-- Tailwind CSS CDN -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-        tailwind.config = {
-            darkMode: 'class',
-            theme: {
-                extend: {
-                    colors: {
-                        cyber: {
-                            900: '#070b14',
-                            800: '#0d1527',
-                            700: '#16223d',
-                            600: '#21335b',
-                            accent: '#00f0ff',
-                            emerald: '#10b981',
-                            crimson: '#f43f5e',
-                            amber: '#f59e0b'
-                        }
-                    }
-                }
-            }
-        }
-    </script>
-    <!-- Lucide Icons -->
-    <script src="https://unpkg.com/lucide@latest"></script>
+    <title>VoiceGuard | AI Deepfake & Synthetic Voice Detection</title>
+    <meta name="description" content="Detect AI-generated and deepfake voices with advanced acoustic forensics. Analyze speech samples in English, Tamil, Hindi, Malayalam, and Telugu using ML-powered detection.">
     <link rel="stylesheet" href="/static/style.css">
+    <!-- Material Symbols -->
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&display=swap">
 </head>
-<body class="bg-cyber-900 text-slate-100 min-h-screen font-sans antialiased selection:bg-cyan-500 selection:text-black">
+<body>
+    <div class="app-shell">
 
-    <!-- Top Navigation -->
-    <header class="border-b border-cyber-700/60 bg-cyber-900/80 backdrop-blur-md sticky top-0 z-50">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
-            <div class="flex items-center space-x-3">
-                <div class="w-9 h-9 rounded-lg bg-gradient-to-tr from-cyan-500 to-blue-600 flex items-center justify-center shadow-lg shadow-cyan-500/20">
-                    <i data-lucide="shield-alert" class="w-5 h-5 text-white"></i>
+        <!-- ═══════════ TOP APP BAR ═══════════ -->
+        <header class="top-app-bar" id="topAppBar">
+            <div class="top-app-bar__leading">
+                <button class="menu-btn" id="menuBtn" aria-label="Navigation menu">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12h18M3 6h18M3 18h18"/></svg>
+                </button>
+                <div class="top-app-bar__logo">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4"/></svg>
                 </div>
-                <div>
-                    <span class="font-bold text-lg tracking-wider text-white flex items-center gap-2">
-                        VOICE<span class="text-cyan-400">GUARD</span>
-                        <span class="text-[10px] uppercase font-mono px-2 py-0.5 rounded-full bg-cyan-950 border border-cyan-800 text-cyan-300">v2.0 Forensic</span>
-                    </span>
-                    <p class="text-[11px] text-slate-400 -mt-1">Multilingual AI-Generated Voice Detection System</p>
+                <div class="top-app-bar__title">
+                    <h1>VOICE<span>GUARD</span>
+                        <span class="version-badge">v2.0 Forensic</span>
+                    </h1>
+                    <p>Multilingual AI-Generated Voice Detection System</p>
                 </div>
             </div>
 
-            <div class="flex items-center space-x-4">
-                <div class="hidden sm:flex items-center space-x-2 text-xs text-slate-400 border border-cyber-700 bg-cyber-800/80 px-3 py-1.5 rounded-full">
-                    <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-                    <span class="font-mono">Engine: Acoustic + ML Classifier</span>
+            <div class="top-app-bar__trailing">
+                <div class="status-chip">
+                    <span class="status-chip__dot"></span>
+                    <span>Engine: Acoustic + ML Classifier</span>
                 </div>
-                <a href="#api-section" class="text-xs text-slate-300 hover:text-cyan-400 transition-colors flex items-center gap-1 font-mono">
-                    <i data-lucide="code-2" class="w-4 h-4"></i>
-                    <span>REST API</span>
+                <a href="#api-section" class="btn btn--text btn--small" style="font-family: var(--font-mono);">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
+                    REST API
                 </a>
             </div>
-        </div>
-    </header>
+        </header>
 
-    <!-- Main Workspace -->
-    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
-        
-        <!-- Hero Title -->
-        <div class="text-center max-w-3xl mx-auto space-y-3">
-            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-cyan-950/70 border border-cyan-500/30 text-cyan-300 text-xs font-mono">
-                <i data-lucide="activity" class="w-3.5 h-3.5 text-cyan-400"></i>
-                <span>Deepfake Voice Detection & Forensic Speech Analysis</span>
+        <!-- ═══════════ NAVIGATION DRAWER (MOBILE) ═══════════ -->
+        <div class="nav-drawer-scrim" id="navDrawerScrim"></div>
+        <nav class="nav-drawer" id="navDrawer">
+            <div class="nav-drawer__header">
+                <div class="top-app-bar__logo" style="width:36px;height:36px;">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:18px;height:18px;"><path stroke-linecap="round" stroke-linejoin="round" d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                </div>
+                <strong style="font-size:16px;letter-spacing:1px;">VOICE<span style="color:var(--md-primary)">GUARD</span></strong>
             </div>
-            <h1 class="text-3xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight text-white">
-                Verify Authenticity of <span class="bg-gradient-to-r from-cyan-400 via-teal-300 to-emerald-400 bg-clip-text text-transparent">Any Spoken Audio</span>
-            </h1>
-            <p class="text-sm sm:text-base text-slate-400">
-                Identify AI cloned voices, neural text-to-speech vocoders, and synthetic speech in English, Tamil, Hindi, Malayalam, and Telugu.
-            </p>
-        </div>
+            <a href="#workspace" class="nav-drawer__item active" data-nav="analyze">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                Analyze
+            </a>
+            <a href="#panelRecord" class="nav-drawer__item" data-nav="record">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 1a3 3 0 00-3 3v8a3 3 0 006 0V4a3 3 0 00-3-3z"/><path d="M19 10v2a7 7 0 01-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg>
+                Record
+            </a>
+            <a href="#panelSamples" class="nav-drawer__item" data-nav="samples">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+                Demo Samples
+            </a>
+            <a href="#api-section" class="nav-drawer__item" data-nav="api">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
+                API Docs
+            </a>
+        </nav>
 
-        <!-- App Grid: Input (Left) & Forensics (Right) -->
-        <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-            
-            <!-- Left Column: Audio Input & Controls (7 Cols) -->
-            <div class="lg:col-span-7 space-y-6">
-                
-                <!-- Main Input Card -->
-                <div class="bg-cyber-800/90 border border-cyber-700/80 rounded-2xl p-6 shadow-xl relative overflow-hidden">
-                    
-                    <!-- Language & Method Bar -->
-                    <div class="flex flex-wrap items-center justify-between gap-4 pb-5 border-b border-cyber-700/60">
-                        <!-- Mode Tabs -->
-                        <div class="inline-flex p-1 bg-cyber-900/90 rounded-xl border border-cyber-700" id="inputModeTabs">
-                            <button id="tabUpload" class="tab-btn active px-4 py-2 text-xs sm:text-sm font-medium rounded-lg flex items-center gap-2 text-white bg-cyan-600 transition-all">
-                                <i data-lucide="upload" class="w-4 h-4"></i>
-                                <span>Upload Audio</span>
-                            </button>
-                            <button id="tabRecord" class="tab-btn px-4 py-2 text-xs sm:text-sm font-medium rounded-lg flex items-center gap-2 text-slate-400 hover:text-white transition-all">
-                                <i data-lucide="mic" class="w-4 h-4"></i>
-                                <span>Record Mic</span>
-                            </button>
-                            <button id="tabSamples" class="tab-btn px-4 py-2 text-xs sm:text-sm font-medium rounded-lg flex items-center gap-2 text-slate-400 hover:text-white transition-all">
-                                <i data-lucide="sparkles" class="w-4 h-4"></i>
-                                <span>Demo Samples</span>
-                            </button>
-                        </div>
+        <div class="app-content">
 
-                        <!-- Language Selector -->
-                        <div class="flex items-center gap-2">
-                            <label for="languageSelect" class="text-xs text-slate-400 font-mono">Language:</label>
-                            <select id="languageSelect" class="bg-cyber-900 border border-cyber-700 text-xs rounded-lg px-3 py-2 text-white focus:outline-none focus:border-cyan-500">
-                                <option value="Auto-detect">Auto-detect</option>
-                                <option value="English">English</option>
-                                <option value="Tamil">Tamil</option>
-                                <option value="Hindi">Hindi</option>
-                                <option value="Malayalam">Malayalam</option>
-                                <option value="Telugu">Telugu</option>
-                            </select>
-                        </div>
+            <!-- ═══════════ NAVIGATION RAIL (DESKTOP) ═══════════ -->
+            <nav class="nav-rail" id="navRail">
+                <a href="#workspace" class="nav-rail__item active" data-nav="analyze">
+                    <div class="nav-rail__icon">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
                     </div>
-
-                    <!-- Panel 1: File Upload Mode -->
-                    <div id="panelUpload" class="tab-panel pt-6 space-y-4">
-                        <div id="dropZone" class="border-2 border-dashed border-cyber-600 hover:border-cyan-500/80 rounded-xl p-8 text-center cursor-pointer transition-all bg-cyber-900/40 hover:bg-cyber-900/80 group">
-                            <input type="file" id="audioFileInput" class="hidden" accept="audio/*,.wav,.mp3,.ogg,.flac,.m4a">
-                            <div class="w-14 h-14 mx-auto rounded-full bg-cyan-950/60 border border-cyan-800/80 flex items-center justify-center text-cyan-400 group-hover:scale-110 group-hover:border-cyan-400 transition-all">
-                                <i data-lucide="cloud-arrow-up" class="w-7 h-7"></i>
-                            </div>
-                            <div class="mt-4 space-y-1">
-                                <p class="text-sm font-medium text-white">Drag & drop your voice file here, or <span class="text-cyan-400 underline">browse</span></p>
-                                <p class="text-xs text-slate-400">Supports WAV, MP3, OGG, FLAC, M4A (minimum 0.8 seconds)</p>
-                            </div>
-                        </div>
+                    <span class="nav-rail__label">Analyze</span>
+                </a>
+                <a href="#panelRecord" class="nav-rail__item" data-nav="record">
+                    <div class="nav-rail__icon">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 1a3 3 0 00-3 3v8a3 3 0 006 0V4a3 3 0 00-3-3z"/><path d="M19 10v2a7 7 0 01-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg>
                     </div>
+                    <span class="nav-rail__label">Record</span>
+                </a>
+                <a href="#panelSamples" class="nav-rail__item" data-nav="samples">
+                    <div class="nav-rail__icon">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+                    </div>
+                    <span class="nav-rail__label">Samples</span>
+                </a>
+                <a href="#api-section" class="nav-rail__item" data-nav="api">
+                    <div class="nav-rail__icon">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
+                    </div>
+                    <span class="nav-rail__label">API</span>
+                </a>
+            </nav>
 
-                                        <!-- Panel 2: Live Microphone Real-Time Detection Station -->
-                    <div id="panelRecord" class="tab-panel hidden pt-6 space-y-6">
-                        
-                        <!-- Main Mic Action Card -->
-                        <div class="border border-cyber-700 bg-cyber-900/80 rounded-2xl p-6 sm:p-8 text-center space-y-6 shadow-2xl relative overflow-hidden">
-                            
-                            <!-- Header Status -->
-                            <div class="flex items-center justify-between border-b border-cyber-700/60 pb-4">
-                                <div class="flex items-center space-x-2">
-                                    <span id="micStateDot" class="w-3 h-3 rounded-full bg-slate-500 transition-all"></span>
-                                    <span id="micStateText" class="text-xs font-mono font-semibold text-slate-300 uppercase tracking-wider">Microphone Standby</span>
+            <!-- ═══════════ MAIN CONTENT ═══════════ -->
+            <main class="main-container" id="workspace">
+
+                <!-- Hero Section -->
+                <section class="hero">
+                    <div class="hero__badge">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+                        <span>Deepfake Voice Detection &amp; Forensic Speech Analysis</span>
+                    </div>
+                    <h2>Verify Authenticity of <span class="gradient-text">Any Spoken Audio</span></h2>
+                    <p class="hero__subtitle">
+                        Identify AI cloned voices, neural text-to-speech vocoders, and synthetic speech in English, Tamil, Hindi, Malayalam, and Telugu.
+                    </p>
+                </section>
+
+                <!-- Workspace Grid -->
+                <div class="workspace-grid">
+
+                    <!-- ═══════════ LEFT COLUMN ═══════════ -->
+                    <div class="workspace-column stagger-children">
+
+                        <!-- Main Input Card -->
+                        <div class="m3-card m3-card--elevated">
+
+                            <!-- Tab Bar + Language -->
+                            <div class="m3-card__header">
+                                <div class="segmented-button" id="inputModeTabs">
+                                    <button id="tabUpload" class="segmented-button__item active ripple">
+                                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                                        <span>Upload Audio</span>
+                                    </button>
+                                    <button id="tabRecord" class="segmented-button__item ripple">
+                                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 1a3 3 0 00-3 3v8a3 3 0 006 0V4a3 3 0 00-3-3z"/><path d="M19 10v2a7 7 0 01-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/></svg>
+                                        <span>Record Mic</span>
+                                    </button>
+                                    <button id="tabSamples" class="segmented-button__item ripple">
+                                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+                                        <span>Demo Samples</span>
+                                    </button>
                                 </div>
-                                <div class="flex items-center space-x-3">
-                                    <span id="recordTimer" class="text-lg font-mono font-bold text-cyan-400">00:00</span>
-                                    <span class="text-xs font-mono text-slate-500">/ 01:00 min</span>
+
+                                <div class="m3-select-wrap">
+                                    <label for="languageSelect">Language:</label>
+                                    <select id="languageSelect" class="m3-select">
+                                        <option value="Auto-detect">Auto-detect</option>
+                                        <option value="English">English</option>
+                                        <option value="Tamil">Tamil</option>
+                                        <option value="Hindi">Hindi</option>
+                                        <option value="Malayalam">Malayalam</option>
+                                        <option value="Telugu">Telugu</option>
+                                    </select>
                                 </div>
                             </div>
-                            <!-- 60-Second Extended Live Accuracy Progress -->
-                            <div class="space-y-1">
-                                <div class="flex items-center justify-between text-[10px] font-mono text-slate-400">
-                                    <span class="flex items-center gap-1">
-                                        <span class="w-1.5 h-1.5 rounded-full bg-cyan-400 animate-pulse"></span>
-                                        <span>60-Second Continuous Accuracy Engine</span>
-                                    </span>
-                                    <span id="sessionDurationTarget">Active Window: 3.5s Real-Time</span>
-                                </div>
-                                <div class="w-full h-1.5 bg-cyber-950 rounded-full overflow-hidden border border-cyber-800">
-                                    <div id="sessionProgressBar" class="h-full bg-gradient-to-r from-cyan-500 to-emerald-400 rounded-full transition-all duration-300" style="width: 0%;"></div>
-                                </div>
-                            </div>
 
-                            <!-- Dedicated Turn On / Stop Mic Button -->
-                            <div class="space-y-3">
-                                <button id="turnOnMicBtn" type="button" class="w-full max-w-md mx-auto py-4 px-6 rounded-xl bg-gradient-to-r from-cyan-500 via-teal-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-slate-950 font-bold text-base tracking-wide flex items-center justify-center gap-3 shadow-xl shadow-cyan-500/25 transition-all active:scale-95 group">
-                                    <span id="btnMicIcon">
-                                        <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 003-3V5a3 3 0 10-6 0v6a3 3 0 003 3z"></path></svg>
-                                    </span>
-                                    <span id="btnMicLabel">Turn On Microphone & Start Live Detection</span>
-                                </button>
-                                <p id="micInstruction" class="text-xs text-slate-400">Click to start. Speak naturally — AI vs Human detection updates <strong class="text-cyan-400">live in real-time</strong> without any submit button.</p>
-                            </div>
-
-                            <!-- Live Audio Visualizer Canvas -->
-                            <div class="bg-cyber-950 rounded-xl p-3 border border-cyber-800 space-y-1">
-                                <div class="flex items-center justify-between text-[11px] font-mono text-slate-400 px-1">
-                                    <span>Real-time Mic Audio Stream</span>
-                                    <span id="liveVolumeLabel">Levels: 0%</span>
-                                </div>
-                                <canvas id="liveRecordVisualizer" class="w-full h-16 rounded bg-cyber-900/50"></canvas>
-                            </div>
-
-                            <!-- Live Detection Real-Time Segment Result Box -->
-                            <div id="micLiveResultBox" class="p-5 rounded-xl border border-cyber-700 bg-cyber-950/90 text-left space-y-4 transition-all duration-300">
-                                <div class="flex items-center justify-between">
-                                    <div class="flex items-center space-x-2">
-                                        <span id="livePulseDot" class="w-3 h-3 rounded-full bg-slate-500"></span>
-                                        <span id="liveVerdictStatus" class="text-xs font-mono font-bold text-slate-400 uppercase tracking-wider">Awaiting Speech Input</span>
+                            <!-- Panel 1: File Upload -->
+                            <div id="panelUpload" class="tab-panel active-panel">
+                                <div id="dropZone" class="drop-zone">
+                                    <input type="file" id="audioFileInput" class="hidden" accept="audio/*,.wav,.mp3,.ogg,.flac,.m4a">
+                                    <div class="drop-zone__icon">
+                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
                                     </div>
-                                    <span id="liveVerdictBadge" class="text-xs font-mono font-bold px-3 py-1 rounded-full bg-slate-800 text-slate-400 border border-slate-700">
-                                        STANDBY
-                                    </span>
+                                    <p class="drop-zone__text">Drag &amp; drop your voice file here, or <a>browse</a></p>
+                                    <p class="drop-zone__hint">Supports WAV, MP3, OGG, FLAC, M4A (minimum 0.8 seconds)</p>
                                 </div>
+                            </div>
 
-                                <!-- Live Verdict Headline -->
-                                <div>
-                                    <h4 id="liveVerdictHeadline" class="text-lg sm:text-xl font-extrabold text-white tracking-tight">Turn on mic and start speaking</h4>
-                                    <p id="liveVerdictSubtitle" class="text-xs text-slate-400 mt-1 leading-relaxed">
-                                        The engine analyzes acoustic formant structures, pitch stability, and spectral smoothness continuously as you talk.
+                            <!-- Panel 2: Live Microphone -->
+                            <div id="panelRecord" class="tab-panel">
+
+                                <div class="mic-panel">
+                                    <!-- Header Status -->
+                                    <div class="mic-panel__header">
+                                        <div class="mic-panel__state">
+                                            <span id="micStateDot" class="mic-panel__state-dot"></span>
+                                            <span id="micStateText" class="mic-panel__state-text">Microphone Standby</span>
+                                        </div>
+                                        <div class="mic-panel__timer">
+                                            <span id="recordTimer" class="mic-panel__timer-value">00:00</span>
+                                            <span class="mic-panel__timer-max">/ 01:00 min</span>
+                                        </div>
+                                    </div>
+
+                                    <!-- Session Progress -->
+                                    <div class="session-progress">
+                                        <div class="session-progress__header">
+                                            <span class="session-progress__label">
+                                                <span class="session-progress__label-dot"></span>
+                                                <span>60-Second Continuous Accuracy Engine</span>
+                                            </span>
+                                            <span id="sessionDurationTarget">Active Window: 3.5s Real-Time</span>
+                                        </div>
+                                        <div class="session-progress__bar-track">
+                                            <div id="sessionProgressBar" class="session-progress__bar-fill" style="width: 0%;"></div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Mic Button -->
+                                    <button id="turnOnMicBtn" type="button" class="fab-mic fab-mic--start ripple">
+                                        <span id="btnMicIcon">
+                                            <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 003-3V5a3 3 0 10-6 0v6a3 3 0 003 3z"></path></svg>
+                                        </span>
+                                        <span id="btnMicLabel">Turn On Microphone &amp; Start Live Detection</span>
+                                    </button>
+                                    <p id="micInstruction" class="mic-instruction">Click to start. Speak naturally — AI vs Human detection updates <strong>live in real-time</strong> without any submit button.</p>
+
+                                    <!-- Live Visualizer -->
+                                    <div class="visualizer-box">
+                                        <div class="visualizer-box__header">
+                                            <span>Real-time Mic Audio Stream</span>
+                                            <span id="liveVolumeLabel">Levels: 0%</span>
+                                        </div>
+                                        <canvas id="liveRecordVisualizer"></canvas>
+                                    </div>
+
+                                    <!-- Live Detection Result -->
+                                    <div id="micLiveResultBox" class="live-result-box">
+                                        <div class="live-result__header">
+                                            <div class="live-result__status">
+                                                <span id="livePulseDot" class="mic-panel__state-dot"></span>
+                                                <span id="liveVerdictStatus" class="mic-panel__state-text">Awaiting Speech Input</span>
+                                            </div>
+                                            <span id="liveVerdictBadge" class="badge badge--standby">STANDBY</span>
+                                        </div>
+
+                                        <div>
+                                            <h4 id="liveVerdictHeadline" class="live-result__headline">Turn on mic and start speaking</h4>
+                                            <p id="liveVerdictSubtitle" class="live-result__subtitle">
+                                                The engine analyzes acoustic formant structures, pitch stability, and spectral smoothness continuously as you talk.
+                                            </p>
+                                        </div>
+
+                                        <!-- Live Confidence Bar -->
+                                        <div class="confidence-bar">
+                                            <div class="confidence-bar__header">
+                                                <span>AI vs Human Live Likelihood</span>
+                                                <span id="liveConfidencePercentage" class="confidence-bar__value">--%</span>
+                                            </div>
+                                            <div class="confidence-bar__track">
+                                                <div id="liveConfidenceBar" class="confidence-bar__fill" style="width: 0%;"></div>
+                                            </div>
+                                        </div>
+
+                                        <!-- Live Metrics Grid -->
+                                        <div class="live-metrics-grid">
+                                            <div class="live-metric-chip">
+                                                <span class="live-metric-chip__label">Live Pitch</span>
+                                                <span id="liveMicPitch" class="live-metric-chip__value">-- Hz</span>
+                                            </div>
+                                            <div class="live-metric-chip">
+                                                <span class="live-metric-chip__label">Pitch Stability</span>
+                                                <span id="liveMicPitchStd" class="live-metric-chip__value">-- Hz</span>
+                                            </div>
+                                            <div class="live-metric-chip">
+                                                <span class="live-metric-chip__label">Classification</span>
+                                                <span id="liveMicType" class="live-metric-chip__value">--</span>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <p style="font-size:11px;color:var(--md-outline);font-family:var(--font-mono);margin-top:12px;">
+                                        ⚡ Real-Time Zero-Click Detection: Audio is continuously processed while talking. Stopping the mic finalizes the full forensic report immediately.
                                     </p>
                                 </div>
-
-                                <!-- Real-time Confidence Bar -->
-                                <div class="space-y-1.5 pt-1">
-                                    <div class="flex items-center justify-between text-xs font-mono text-slate-300">
-                                        <span>AI vs Human Live Likelihood</span>
-                                        <span id="liveConfidencePercentage" class="font-bold text-cyan-400">--%</span>
-                                    </div>
-                                    <div class="w-full h-2.5 bg-cyber-900 rounded-full overflow-hidden border border-cyber-700">
-                                        <div id="liveConfidenceBar" class="h-full bg-cyan-500 rounded-full transition-all duration-500" style="width: 0%;"></div>
-                                    </div>
-                                </div>
-
-                                <!-- Live Metrics Micro-Grid inside the Mic Segment -->
-                                <div class="grid grid-cols-3 gap-2 pt-2 text-center text-xs">
-                                    <div class="p-2 rounded-lg bg-cyber-900/90 border border-cyber-800">
-                                        <span class="text-[10px] text-slate-500 font-mono block">Live Pitch</span>
-                                        <span id="liveMicPitch" class="font-mono font-bold text-cyan-400">-- Hz</span>
-                                    </div>
-                                    <div class="p-2 rounded-lg bg-cyber-900/90 border border-cyber-800">
-                                        <span class="text-[10px] text-slate-500 font-mono block">Pitch Stability</span>
-                                        <span id="liveMicPitchStd" class="font-mono font-bold text-cyan-400">-- Hz</span>
-                                    </div>
-                                    <div class="p-2 rounded-lg bg-cyber-900/90 border border-cyber-800">
-                                        <span class="text-[10px] text-slate-500 font-mono block">Classification</span>
-                                        <span id="liveMicType" class="font-mono font-bold text-slate-300">--</span>
-                                    </div>
-                                </div>
-
                             </div>
 
-                            <div class="text-[11px] text-slate-500 font-mono">
-                                ⚡ Real-Time Zero-Click Detection: Audio is continuously processed while talking. Stopping the mic finalizes the full forensic report immediately.
-                            </div>
-
-                        </div>
-                    </div>
-
-                    <!-- Panel 3: Demo Samples Mode -->
-                    <div id="panelSamples" class="tab-panel hidden pt-6 space-y-3">
-                        <p class="text-xs text-slate-400 font-mono">Select a pre-loaded sample audio to test the detector instantly:</p>
-                        <div id="samplesList" class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                            <!-- Populated dynamically via JS -->
-                        </div>
-                    </div>
-
-                    <!-- Active Audio Track Player & Waveform Visualizer -->
-                    <div id="playerSection" class="mt-6 pt-5 border-t border-cyber-700/60 space-y-3">
-                        <div class="flex items-center justify-between">
-                            <div class="flex items-center space-x-3 overflow-hidden">
-                                <div class="w-8 h-8 rounded-lg bg-cyan-950 border border-cyan-800 flex items-center justify-center text-cyan-400 shrink-0">
-                                    <i data-lucide="volume-2" class="w-4 h-4"></i>
-                                </div>
-                                <div class="truncate">
-                                    <p id="loadedAudioName" class="text-xs font-semibold text-white truncate">No audio loaded</p>
-                                    <p id="loadedAudioMeta" class="text-[11px] text-slate-400 font-mono">0.00s | 0 KB</p>
+                            <!-- Panel 3: Demo Samples -->
+                            <div id="panelSamples" class="tab-panel">
+                                <p style="font-size:12px;color:var(--md-on-surface-variant);font-family:var(--font-mono);margin-bottom:12px;">Select a pre-loaded sample audio to test the detector instantly:</p>
+                                <div id="samplesList" class="samples-grid">
+                                    <!-- Populated dynamically -->
                                 </div>
                             </div>
 
-                            <!-- Play/Pause & Reset Buttons -->
-                            <div class="flex items-center space-x-2">
-                                <button id="playPauseBtn" disabled class="px-3 py-1.5 rounded-lg bg-cyber-700 hover:bg-cyan-600 text-white text-xs flex items-center gap-1.5 transition-all disabled:opacity-40 disabled:pointer-events-none">
-                                    <i id="playIcon" data-lucide="play" class="w-3.5 h-3.5"></i>
-                                    <span id="playText">Play</span>
-                                </button>
-                                <button id="clearAudioBtn" class="p-1.5 rounded-lg text-slate-400 hover:text-rose-400 hover:bg-cyber-700/60 transition-colors" title="Clear">
-                                    <i data-lucide="trash-2" class="w-4 h-4"></i>
+                            <!-- Audio Player + Waveform -->
+                            <div id="playerSection" class="player-section">
+                                <div class="player-section__header">
+                                    <div class="player-section__info">
+                                        <div class="player-section__icon">
+                                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M19.07 4.93a10 10 0 010 14.14M15.54 8.46a5 5 0 010 7.07"/></svg>
+                                        </div>
+                                        <div style="overflow:hidden;">
+                                            <p id="loadedAudioName" class="player-section__name">No audio loaded</p>
+                                            <p id="loadedAudioMeta" class="player-section__meta">0.00s | 0 KB</p>
+                                        </div>
+                                    </div>
+                                    <div class="player-section__controls">
+                                        <button id="playPauseBtn" disabled class="btn btn--tonal btn--small ripple">
+                                            <svg id="playIcon" width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+                                            <span id="playText">Play</span>
+                                        </button>
+                                        <button id="clearAudioBtn" class="btn--icon" title="Clear">
+                                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/></svg>
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <div class="waveform-wrap">
+                                    <canvas id="waveformCanvas"></canvas>
+                                    <div id="waveformProgress" class="waveform-progress" style="width: 0%;"></div>
+                                </div>
+
+                                <audio id="nativeAudio" class="hidden"></audio>
+
+                                <button id="analyzeBtn" disabled class="analyze-fab ripple">
+                                    <svg id="analyzeIcon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 3h6a4 4 0 014 4v14a3 3 0 00-3-3H2z"/><path d="M22 3h-6a4 4 0 00-4 4v14a3 3 0 013-3h7z"/></svg>
+                                    <span id="analyzeText">Analyze Voice Sample</span>
                                 </button>
                             </div>
+
                         </div>
 
-                        <!-- Waveform Canvas -->
-                        <div class="relative bg-cyber-950 rounded-xl p-2 border border-cyber-700/80 overflow-hidden">
-                            <canvas id="waveformCanvas" class="w-full h-20 rounded cursor-pointer"></canvas>
-                            <div id="waveformProgress" class="absolute left-0 top-0 bottom-0 bg-cyan-500/15 pointer-events-none transition-all" style="width: 0%;"></div>
+                        <!-- Session History -->
+                        <div class="m3-card">
+                            <div class="m3-card__header" style="margin-bottom:8px;">
+                                <h3 class="m3-card__title">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                                    Detection History
+                                </h3>
+                                <button id="clearHistoryBtn" class="btn btn--text btn--small" style="color:var(--md-error);">Clear Log</button>
+                            </div>
+                            <div id="historyList" class="history-list">
+                                <p class="history-list__empty">No analysis performed in this session yet.</p>
+                            </div>
                         </div>
 
-                        <!-- Hidden Native Audio Element -->
-                        <audio id="nativeAudio" class="hidden"></audio>
-
-                        <!-- Analyze Action Button -->
-                        <div class="pt-2">
-                            <button id="analyzeBtn" disabled class="w-full py-3.5 px-6 rounded-xl bg-gradient-to-r from-cyan-500 via-teal-500 to-emerald-500 hover:from-cyan-400 hover:to-emerald-400 text-slate-950 font-bold text-sm sm:text-base tracking-wide flex items-center justify-center gap-2 shadow-lg shadow-cyan-500/20 transition-all disabled:opacity-40 disabled:pointer-events-none group">
-                                <i id="analyzeIcon" data-lucide="scan" class="w-5 h-5 group-hover:rotate-90 transition-transform"></i>
-                                <span id="analyzeText">Analyze Voice Sample</span>
-                            </button>
-                        </div>
                     </div>
 
-                </div>
+                    <!-- ═══════════ RIGHT COLUMN ═══════════ -->
+                    <div class="workspace-column stagger-children">
 
-                <!-- Session History Log -->
-                <div class="bg-cyber-800/90 border border-cyber-700/80 rounded-2xl p-6 shadow-xl space-y-4">
-                    <div class="flex items-center justify-between">
-                        <h3 class="text-sm font-bold text-white flex items-center gap-2">
-                            <i data-lucide="history" class="w-4 h-4 text-slate-400"></i>
-                            <span>Detection History</span>
-                        </h3>
-                        <button id="clearHistoryBtn" class="text-xs text-slate-400 hover:text-rose-400 font-mono">Clear Log</button>
-                    </div>
-                    <div id="historyList" class="space-y-2 max-h-48 overflow-y-auto pr-1">
-                        <p class="text-xs text-slate-500 py-3 text-center italic">No analysis performed in this session yet.</p>
-                    </div>
-                </div>
+                        <!-- Verdict Card -->
+                        <div id="verdictCard" class="m3-card m3-card--elevated verdict-card">
+                            <div class="verdict__top">
+                                <span class="verdict__label">Classification Verdict</span>
+                                <span id="verdictBadge" class="badge badge--standby">WAITING FOR AUDIO</span>
+                            </div>
 
-            </div>
-
-            <!-- Right Column: Forensic Results & Insights (5 Cols) -->
-            <div class="lg:col-span-5 space-y-6">
-                
-                <!-- Verdict Hero Card -->
-                <div id="verdictCard" class="bg-cyber-800/90 border border-cyber-700/80 rounded-2xl p-6 shadow-xl relative overflow-hidden transition-all duration-300">
-                    <div class="space-y-4">
-                        <div class="flex items-center justify-between">
-                            <span class="text-xs font-mono text-slate-400 uppercase tracking-wider">Classification Verdict</span>
-                            <span id="verdictBadge" class="text-[11px] font-mono font-bold px-2.5 py-1 rounded-full bg-slate-800 border border-slate-700 text-slate-400">
-                                WAITING FOR AUDIO
-                            </span>
-                        </div>
-
-                        <div class="space-y-1">
-                            <h2 id="verdictTitle" class="text-2xl font-bold text-white tracking-tight">Ready to Inspect</h2>
-                            <p id="verdictRisk" class="text-xs font-mono text-slate-400">Upload or record a speech sample to begin forensic analysis</p>
-                        </div>
-
-                        <!-- Confidence Gauge -->
-                        <div class="bg-cyber-900/90 border border-cyber-700/80 rounded-xl p-4 flex items-center justify-between">
                             <div>
-                                <p class="text-xs text-slate-400 font-mono">Forensic Confidence</p>
-                                <p id="confidenceScoreVal" class="text-3xl font-extrabold font-mono text-white mt-0.5">--%</p>
+                                <h2 id="verdictTitle" class="verdict__title">Ready to Inspect</h2>
+                                <p id="verdictRisk" class="verdict__risk">Upload or record a speech sample to begin forensic analysis</p>
                             </div>
-                            <div class="w-20 h-20 relative flex items-center justify-center">
-                                <svg class="w-full h-full transform -rotate-90" viewBox="0 0 36 36">
-                                    <path class="text-cyber-700" stroke-width="3.5" stroke="currentColor" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"/>
-                                    <path id="gaugeCircle" class="text-cyan-400 transition-all duration-1000 ease-out" stroke-dasharray="0, 100" stroke-width="3.5" stroke-linecap="round" stroke="currentColor" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"/>
-                                </svg>
-                                <i id="verdictIcon" data-lucide="shield-question" class="w-6 h-6 text-slate-400 absolute"></i>
+
+                            <!-- Confidence Gauge -->
+                            <div class="gauge-container">
+                                <div class="gauge-container__info">
+                                    <p>Forensic Confidence</p>
+                                    <p id="confidenceScoreVal" class="gauge-value">--%</p>
+                                </div>
+                                <div class="gauge-ring">
+                                    <svg viewBox="0 0 36 36">
+                                        <path class="gauge-ring__track" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"/>
+                                        <path id="gaugeCircle" class="gauge-ring__fill" stroke-dasharray="0, 100" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"/>
+                                    </svg>
+                                    <div id="verdictIcon" class="gauge-ring__icon">
+                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Explanation -->
+                            <div id="explanationBanner" class="explanation-banner">
+                                Acoustic signals are decomposed into pitch contours, Mel-Frequency Cepstral Coefficients (MFCCs), spectral centroids, and energy variance to detect algorithmic voice cloning.
                             </div>
                         </div>
 
-                        <!-- Forensic Explanation Banner -->
-                        <div id="explanationBanner" class="p-3.5 rounded-xl bg-cyber-900/60 border border-cyber-700 text-xs text-slate-300 leading-relaxed">
-                            Acoustic signals are decomposed into pitch contours, Mel-Frequency Cepstral Coefficients (MFCCs), spectral centroids, and energy variance to detect algorithmic voice cloning.
+                        <!-- Acoustic Metrics Card -->
+                        <div class="m3-card">
+                            <div class="m3-card__header" style="margin-bottom:12px;">
+                                <h3 class="m3-card__title">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="4" width="16" height="16" rx="2"/><rect x="9" y="9" width="6" height="6"/><line x1="9" y1="1" x2="9" y2="4"/><line x1="15" y1="1" x2="15" y2="4"/><line x1="9" y1="20" x2="9" y2="23"/><line x1="15" y1="20" x2="15" y2="23"/><line x1="20" y1="9" x2="23" y2="9"/><line x1="20" y1="14" x2="23" y2="14"/><line x1="1" y1="9" x2="4" y2="9"/><line x1="1" y1="14" x2="4" y2="14"/></svg>
+                                    Acoustic Forensics Radar
+                                </h3>
+                                <span class="label-small" style="color:var(--md-on-surface-variant);font-family:var(--font-mono);">18 Feature Vectors</span>
+                            </div>
+
+                            <!-- Metric Cards Grid -->
+                            <div class="metrics-grid stagger-children">
+                                <div class="metric-card">
+                                    <span class="metric-card__label">Pitch Mean (F0)</span>
+                                    <p id="metricPitchMean" class="metric-card__value">-- Hz</p>
+                                    <span class="metric-card__hint">Vocal chord frequency</span>
+                                </div>
+                                <div class="metric-card">
+                                    <span class="metric-card__label">Pitch Stability (Std)</span>
+                                    <p id="metricPitchStd" class="metric-card__value">-- Hz</p>
+                                    <span class="metric-card__hint">&lt;50 indicates synthetic</span>
+                                </div>
+                                <div class="metric-card">
+                                    <span class="metric-card__label">Spectral Centroid</span>
+                                    <p id="metricSpectral" class="metric-card__value">-- Hz</p>
+                                    <span class="metric-card__hint">&gt;3000 indicates smoothing</span>
+                                </div>
+                                <div class="metric-card">
+                                    <span class="metric-card__label">RMS Energy Var</span>
+                                    <p id="metricRms" class="metric-card__value">--</p>
+                                    <span class="metric-card__hint">&lt;0.01 indicates monotone</span>
+                                </div>
+                            </div>
+
+                            <!-- MFCC Chart -->
+                            <div class="mfcc-section">
+                                <div class="mfcc-section__header">
+                                    <span>MFCC Timbre Fingerprint (1-13)</span>
+                                    <span id="mfccAvgLabel">Spectral Shape</span>
+                                </div>
+                                <div id="mfccChart" class="mfcc-chart">
+                                    <div class="mfcc-chart__placeholder">Awaiting analysis...</div>
+                                </div>
+                            </div>
                         </div>
+
                     </div>
                 </div>
 
-                <!-- Acoustic Radar / Metrics Breakdown -->
-                <div class="bg-cyber-800/90 border border-cyber-700/80 rounded-2xl p-6 shadow-xl space-y-4">
-                    <h3 class="text-sm font-bold text-white flex items-center justify-between">
-                        <span class="flex items-center gap-2">
-                            <i data-lucide="cpu" class="w-4 h-4 text-cyan-400"></i>
-                            <span>Acoustic Forensics Radar</span>
-                        </span>
-                        <span class="text-[10px] font-mono text-slate-400">18 Feature Vectors</span>
-                    </h3>
-
-                    <!-- Metric Cards Grid -->
-                    <div class="grid grid-cols-2 gap-3 text-xs">
-                        <div class="p-3 rounded-xl bg-cyber-900/80 border border-cyber-700/70 space-y-1">
-                            <span class="text-[11px] text-slate-400 font-mono">Pitch Mean (F0)</span>
-                            <p id="metricPitchMean" class="text-base font-bold font-mono text-cyan-400">-- Hz</p>
-                            <span class="text-[10px] text-slate-500 block">Vocal chord frequency</span>
+                <!-- ═══════════ API SECTION ═══════════ -->
+                <section id="api-section" class="m3-card api-section">
+                    <div class="api-section__header">
+                        <div>
+                            <h2 class="api-section__title">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="4 17 10 11 4 5"/><line x1="12" y1="19" x2="20" y2="19"/></svg>
+                                Developer API Integration
+                            </h2>
+                            <p class="api-section__subtitle">Directly query the REST API endpoint from your applications</p>
                         </div>
-
-                        <div class="p-3 rounded-xl bg-cyber-900/80 border border-cyber-700/70 space-y-1">
-                            <span class="text-[11px] text-slate-400 font-mono">Pitch Stability (Std)</span>
-                            <p id="metricPitchStd" class="text-base font-bold font-mono text-cyan-400">-- Hz</p>
-                            <span class="text-[10px] text-slate-500 block">&lt;50 indicates synthetic</span>
-                        </div>
-
-                        <div class="p-3 rounded-xl bg-cyber-900/80 border border-cyber-700/70 space-y-1">
-                            <span class="text-[11px] text-slate-400 font-mono">Spectral Centroid</span>
-                            <p id="metricSpectral" class="text-base font-bold font-mono text-cyan-400">-- Hz</p>
-                            <span class="text-[10px] text-slate-500 block">&gt;3000 indicates smoothing</span>
-                        </div>
-
-                        <div class="p-3 rounded-xl bg-cyber-900/80 border border-cyber-700/70 space-y-1">
-                            <span class="text-[11px] text-slate-400 font-mono">RMS Energy Var</span>
-                            <p id="metricRms" class="text-base font-bold font-mono text-cyan-400">--</p>
-                            <span class="text-[10px] text-slate-500 block">&lt;0.01 indicates monotone</span>
+                        <div class="api-endpoints">
+                            <span class="api-endpoint-chip api-endpoint-chip--primary">POST /api/voice-detection</span>
+                            <span class="api-endpoint-chip api-endpoint-chip--secondary">POST /api/detect-file</span>
                         </div>
                     </div>
 
-                    <!-- MFCC 13-Band Fingerprint Chart -->
-                    <div class="space-y-2 pt-2">
-                        <div class="flex items-center justify-between text-xs text-slate-400 font-mono">
-                            <span>MFCC Timbre Fingerprint (1-13)</span>
-                            <span id="mfccAvgLabel">Spectral Shape</span>
-                        </div>
-                        <div id="mfccChart" class="h-24 flex items-end gap-1.5 bg-cyber-900/90 border border-cyber-700/80 rounded-xl p-3">
-                            <!-- 13 bars generated dynamically -->
-                            <div class="flex-1 text-center text-xs text-slate-600 self-center">Awaiting analysis...</div>
-                        </div>
+                    <!-- Code Tabs -->
+                    <div class="api-tabs">
+                        <button class="api-tab active" data-target="snippetCurl">cURL (Base64)</button>
+                        <button class="api-tab" data-target="snippetPython">Python (Requests)</button>
+                        <button class="api-tab" data-target="snippetJs">JavaScript (Fetch)</button>
                     </div>
-                </div>
 
-            </div>
-
-        </div>
-
-        <!-- REST API Developer Reference Section -->
-        <section id="api-section" class="bg-cyber-800/90 border border-cyber-700/80 rounded-2xl p-6 sm:p-8 shadow-xl space-y-6">
-            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-cyber-700/60 pb-4">
-                <div>
-                    <h2 class="text-xl font-bold text-white flex items-center gap-2">
-                        <i data-lucide="terminal" class="w-5 h-5 text-cyan-400"></i>
-                        <span>Developer API Integration</span>
-                    </h2>
-                    <p class="text-xs sm:text-sm text-slate-400 mt-1">Directly query the REST API endpoint from your applications</p>
-                </div>
-                <div class="flex items-center gap-2">
-                    <span class="text-xs font-mono px-3 py-1 bg-cyan-950 border border-cyan-800 text-cyan-300 rounded-lg">POST /api/voice-detection</span>
-                    <span class="text-xs font-mono px-3 py-1 bg-emerald-950 border border-emerald-800 text-emerald-300 rounded-lg">POST /api/detect-file</span>
-                </div>
-            </div>
-
-            <!-- Code Snippet Tabs -->
-            <div class="space-y-3">
-                <div class="flex items-center space-x-2 text-xs font-mono border-b border-cyber-700 pb-2">
-                    <button class="api-tab active px-3 py-1.5 rounded-lg bg-cyber-700 text-white" data-target="snippetCurl">cURL (Base64)</button>
-                    <button class="api-tab px-3 py-1.5 rounded-lg text-slate-400 hover:text-white" data-target="snippetPython">Python (Requests)</button>
-                    <button class="api-tab px-3 py-1.5 rounded-lg text-slate-400 hover:text-white" data-target="snippetJs">JavaScript (Fetch)</button>
-                </div>
-
-                <!-- cURL Snippet -->
-                <div id="snippetCurl" class="api-snippet bg-cyber-950 border border-cyber-700/80 rounded-xl p-4 font-mono text-xs text-slate-300 relative group overflow-x-auto">
-                    <button class="copy-btn absolute top-3 right-3 px-2.5 py-1 rounded bg-cyber-700 hover:bg-cyan-600 text-white text-[11px] transition-all">Copy</button>
-                    <pre><code>curl -X POST http://127.0.0.1:8000/api/voice-detection   -H "Content-Type: application/json"   -d '{
+                    <!-- cURL Snippet -->
+                    <div id="snippetCurl" class="api-snippet active-snippet">
+                        <div class="api-code-block">
+                            <button class="copy-btn">Copy</button>
+                            <pre><code>curl -X POST http://127.0.0.1:8000/api/voice-detection   -H "Content-Type: application/json"   -d '{
     "language": "English",
     "audioFormat": "wav",
     "audioBase64": "&lt;BASE64_ENCODED_AUDIO_STRING&gt;"
   }'</code></pre>
-                </div>
+                        </div>
+                    </div>
 
-                <!-- Python Snippet -->
-                <div id="snippetPython" class="api-snippet hidden bg-cyber-950 border border-cyber-700/80 rounded-xl p-4 font-mono text-xs text-slate-300 relative group overflow-x-auto">
-                    <button class="copy-btn absolute top-3 right-3 px-2.5 py-1 rounded bg-cyber-700 hover:bg-cyan-600 text-white text-[11px] transition-all">Copy</button>
-                    <pre><code>import requests
+                    <!-- Python Snippet -->
+                    <div id="snippetPython" class="api-snippet">
+                        <div class="api-code-block">
+                            <button class="copy-btn">Copy</button>
+                            <pre><code>import requests
 import base64
 
 with open("voice_sample.wav", "rb") as f:
@@ -455,12 +465,14 @@ payload = {
 
 response = requests.post("http://127.0.0.1:8000/api/voice-detection", json=payload)
 print(response.json())</code></pre>
-                </div>
+                        </div>
+                    </div>
 
-                <!-- JS Snippet -->
-                <div id="snippetJs" class="api-snippet hidden bg-cyber-950 border border-cyber-700/80 rounded-xl p-4 font-mono text-xs text-slate-300 relative group overflow-x-auto">
-                    <button class="copy-btn absolute top-3 right-3 px-2.5 py-1 rounded bg-cyber-700 hover:bg-cyan-600 text-white text-[11px] transition-all">Copy</button>
-                    <pre><code>const formData = new FormData();
+                    <!-- JS Snippet -->
+                    <div id="snippetJs" class="api-snippet">
+                        <div class="api-code-block">
+                            <button class="copy-btn">Copy</button>
+                            <pre><code>const formData = new FormData();
 formData.append("file", audioBlob, "recording.wav");
 formData.append("language", "English");
 
@@ -470,23 +482,21 @@ const res = await fetch("http://127.0.0.1:8000/api/detect-file", {
 });
 const result = await res.json();
 console.log("Verdict:", result.classification, "Confidence:", result.confidenceScore);</code></pre>
-                </div>
-            </div>
-        </section>
+                        </div>
+                    </div>
+                </section>
 
-    </main>
+            </main>
+        </div>
 
-    <!-- Footer -->
-    <footer class="border-t border-cyber-700/60 bg-cyber-900/90 py-6 text-center text-xs text-slate-500">
-        <p>AI Voice Detection Engine &bull; Built with FastAPI, Librosa, Scikit-Learn, & Waveform Canvas</p>
-    </footer>
+        <!-- ═══════════ FOOTER ═══════════ -->
+        <footer class="app-footer">
+            <p>AI Voice Detection Engine &bull; Built with FastAPI, Librosa, Scikit-Learn, &amp; Waveform Canvas</p>
+        </footer>
+
+    </div>
 
     <!-- App Logic Scripts -->
-    <script src="/static/app.js?v=2.5"></script>
-    <script>
-        if (typeof window !== 'undefined' && window.lucide && typeof window.lucide.createIcons === 'function') {
-            try { lucide.createIcons(); } catch(e) {}
-        }
-    </script>
+    <script src="/static/app.js?v=3.0"></script>
 </body>
 </html>
