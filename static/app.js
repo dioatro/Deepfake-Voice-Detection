@@ -30,8 +30,9 @@ let recordStartTime = 0;
 let recordTimerInterval = null;
 let liveStreamInterval = null;
 let isAnalyzingLive = false;
-let liveSmoothedPercent = null;
+let liveSmoothedProbAi = null;
 let liveSmoothedIsAi = null;
+let liveVerdictHoldCount = 0;
 
 // Inline SVGs for mic button
 const SVG_MIC = '<svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 003-3V5a3 3 0 10-6 0v6a3 3 0 003 3z"></path></svg>';
@@ -408,8 +409,9 @@ async function startPcmRecording() {
         mediaRecorderChunks = [];
         isRecordingPcm = true;
         recordStartTime = Date.now();
-        liveSmoothedPercent = null;
+        liveSmoothedProbAi = null;
         liveSmoothedIsAi = null;
+        liveVerdictHoldCount = 0;
 
         mediaStreamSource = audioContext.createMediaStreamSource(activeMediaStream);
 
@@ -485,13 +487,15 @@ async function startPcmRecording() {
         // Visualizer
         startPcmVisualizer(activeMediaStream);
 
-        // Live rolling WAV detection
+        // Live rolling WAV detection (4.0s window with continuous EMA smoothing)
         liveStreamInterval = setInterval(async () => {
             const elapsedSec = (Date.now() - recordStartTime) / 1000;
-            if (elapsedSec >= 1.0 && pcmSampleBuffer.length > 0 && !isAnalyzingLive) {
+            // Allow at least 1.8s of speech so sufficient phonemes and pitch frames exist
+            if (elapsedSec >= 1.8 && pcmSampleBuffer.length > 0 && !isAnalyzingLive) {
                 isAnalyzingLive = true;
                 try {
-                    const samplesNeeded = Math.floor(pcmSampleRate * 3.0);
+                    // Use a 4.0-second rolling window for acoustic stability
+                    const samplesNeeded = Math.floor(pcmSampleRate * 4.0);
                     const allSamples = flattenPcmBuffer(pcmSampleBuffer);
                     const recentSamples = allSamples.length > samplesNeeded
                         ? allSamples.subarray(allSamples.length - samplesNeeded)
@@ -503,7 +507,8 @@ async function startPcmRecording() {
                         if (abs > maxAmp) maxAmp = abs;
                     }
 
-                    if (maxAmp > 0.015) {
+                    // Only send if active sound is present
+                    if (maxAmp > 0.02) {
                         const wavBlob = encodeWavPcm(recentSamples, pcmSampleRate);
                         const formData = new FormData();
                         formData.append("file", wavBlob, "live_stream.wav");
@@ -518,7 +523,6 @@ async function startPcmRecording() {
                             const data = await res.json();
                             if (data.status === "success") {
                                 updateLiveMicSegment(data);
-                                renderDetectionResults(data);
                             }
                         }
                     }
@@ -562,6 +566,9 @@ function stopPcmRecording() {
     clearInterval(recordTimerInterval);
     clearInterval(liveStreamInterval);
     stopLiveVisualizer();
+    liveSmoothedProbAi = null;
+    liveSmoothedIsAi = null;
+    liveVerdictHoldCount = 0;
 
     if (activeMediaStream) {
         activeMediaStream.getTracks().forEach(t => t.stop());
@@ -632,23 +639,59 @@ function stopPcmRecording() {
 }
 
 // ============================================================
-// Live Mic Segment Update (with EMA Smoothing)
+// Live Mic Segment Update (with Hysteresis & Continuous Probability Smoothing)
 // ============================================================
 function updateLiveMicSegment(data) {
     if (!liveVerdictBadge) return;
-    const rawIsAi = data.classification === "AI_GENERATED";
-    const rawPercent = data.confidencePercent || Math.round(data.confidenceScore * 100);
+    if (data.status === "waiting" || data.classification === "SILENCE") return;
 
-    if (liveSmoothedPercent === null) {
-        liveSmoothedPercent = rawPercent;
-        liveSmoothedIsAi = rawIsAi;
+    // Extract continuous AI probability (0.0 to 1.0)
+    const rawProbAi = typeof data.probAi === "number"
+        ? data.probAi
+        : (data.classification === "AI_GENERATED" ? data.confidenceScore : (1.0 - data.confidenceScore));
+
+    if (liveSmoothedProbAi === null) {
+        liveSmoothedProbAi = rawProbAi;
+        liveSmoothedIsAi = rawProbAi >= 0.50;
+        liveVerdictHoldCount = 0;
     } else {
-        liveSmoothedPercent = Math.round(0.70 * rawPercent + 0.30 * liveSmoothedPercent);
-        liveSmoothedIsAi = rawIsAi;
+        // High-inertia exponential moving average (30% new measurement, 70% historical inertia)
+        // Prevents momentary inter-syllable acoustic dips or breath pauses from dragging down the verdict
+        liveSmoothedProbAi = 0.30 * rawProbAi + 0.70 * liveSmoothedProbAi;
+
+        // Dual-Threshold Hysteresis (Schmitt Trigger):
+        // Once AI is detected, do NOT flip back to Human unless probability drops deep into Human territory (< 0.44)
+        // for at least 2 consecutive cycles. Likewise, do not flip to AI unless score climbs firmly to > 0.52.
+        const THRESHOLD_TO_AI = 0.52;
+        const THRESHOLD_TO_HUMAN = 0.44;
+        const CONFIRM_CYCLES = 2;
+
+        if (liveSmoothedIsAi) {
+            if (liveSmoothedProbAi < THRESHOLD_TO_HUMAN) {
+                liveVerdictHoldCount++;
+                if (liveVerdictHoldCount >= CONFIRM_CYCLES) {
+                    liveSmoothedIsAi = false;
+                    liveVerdictHoldCount = 0;
+                }
+            } else {
+                liveVerdictHoldCount = 0;
+            }
+        } else {
+            if (liveSmoothedProbAi > THRESHOLD_TO_AI) {
+                liveVerdictHoldCount++;
+                if (liveVerdictHoldCount >= CONFIRM_CYCLES) {
+                    liveSmoothedIsAi = true;
+                    liveVerdictHoldCount = 0;
+                }
+            } else {
+                liveVerdictHoldCount = 0;
+            }
+        }
     }
 
     const isAi = liveSmoothedIsAi;
-    const percent = liveSmoothedPercent;
+    const confidenceScore = isAi ? liveSmoothedProbAi : (1.0 - liveSmoothedProbAi);
+    const percent = Math.min(99, Math.max(52, Math.round(confidenceScore * 100)));
 
     if (isAi) {
         micLiveResultBox.className = "live-result-box verdict-ai";
@@ -693,6 +736,21 @@ function updateLiveMicSegment(data) {
         liveMicPitch.textContent = `${data.features.pitch_mean} Hz`;
         liveMicPitchStd.textContent = `${data.features.pitch_std} Hz`;
     }
+
+    // Keep the master verdict card in 100% synchronized harmony with the live stream
+    const liveSnapshot = {
+        ...data,
+        classification: isAi ? "AI_GENERATED" : "HUMAN",
+        verdictTitle: isAi ? "AI-Generated Voice Detected" : "Human Voice Detected",
+        verdictBadge: isAi ? "🚨 AI GENERATED" : "👤 AUTHENTIC HUMAN",
+        verdictTheme: isAi ? "danger" : "success",
+        confidenceScore: confidenceScore,
+        confidencePercent: percent,
+        probAi: liveSmoothedProbAi,
+        riskLevel: isAi ? "HIGH PROBABILITY OF AI SYNTHESIS" : "AUTHENTIC HUMAN SPEECH"
+    };
+
+    renderDetectionResults(liveSnapshot, /* isLive = */ true);
 }
 
 // ============================================================
@@ -931,7 +989,7 @@ async function runVoiceDetection() {
 // ============================================================
 // Render Results (M3 Classes)
 // ============================================================
-function renderDetectionResults(data) {
+function renderDetectionResults(data, isLive = false) {
     const isAi = data.classification === "AI_GENERATED";
     const percent = data.confidencePercent || Math.round(data.confidenceScore * 100);
 
@@ -979,8 +1037,8 @@ function renderDetectionResults(data) {
         drawStaticWaveform(data.waveformPeaks);
     }
 
-    // Smooth scroll to verdict on mobile
-    if (window.innerWidth < 1024) {
+    // Smooth scroll to verdict on mobile (only when explicitly finalizing or manually analyzing, NOT during live mic)
+    if (!isLive && window.innerWidth < 1024) {
         verdictCard.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
 }
