@@ -122,7 +122,10 @@ async def detect_file(
             result = analyze_audio(audio, sr, language=language)
         except ValueError as ve:
             raise HTTPException(status_code=400, detail=str(ve))
+        import hashlib
         result["filename"] = file.filename
+        result["sha256"] = hashlib.sha256(content).hexdigest()
+        result["fileSize"] = len(content)
         return result
 
     except HTTPException:

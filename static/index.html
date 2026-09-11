@@ -395,6 +395,26 @@
                                     <p id="metricRms" class="metric-card__value">--</p>
                                     <span class="metric-card__hint">&lt;0.01 indicates monotone</span>
                                 </div>
+                                <div class="metric-card">
+                                    <span class="metric-card__label">Suspected Engine</span>
+                                    <p id="metricSuspectedEngine" class="metric-card__value" style="font-size:0.92rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">--</p>
+                                    <span id="metricEngineMatch" class="metric-card__hint">Signature match</span>
+                                </div>
+                                <div class="metric-card">
+                                    <span class="metric-card__label">Micro-Jitter</span>
+                                    <p id="metricJitter" class="metric-card__value">-- %</p>
+                                    <span class="metric-card__hint">Laryngeal micro-tremors</span>
+                                </div>
+                                <div class="metric-card">
+                                    <span class="metric-card__label">Shimmer Index</span>
+                                    <p id="metricShimmer" class="metric-card__value">-- %</p>
+                                    <span class="metric-card__hint">Amplitude perturbation</span>
+                                </div>
+                                <div class="metric-card">
+                                    <span class="metric-card__label">Phase Continuity</span>
+                                    <p id="metricPhase" class="metric-card__value">-- / 100</p>
+                                    <span class="metric-card__hint">Harmonic coherence</span>
+                                </div>
                             </div>
 
                             <!-- MFCC Chart -->
@@ -497,6 +517,6 @@ console.log("Verdict:", result.classification, "Confidence:", result.confidenceS
     </div>
 
     <!-- App Logic Scripts -->
-    <script src="/static/app.js?v=3.1"></script>
+    <script src="/static/app.js?v=3.2"></script>
 </body>
 </html>
